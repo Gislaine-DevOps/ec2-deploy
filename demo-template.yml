@@ -4,7 +4,7 @@ Resources:
  Ec2Instance: 
   Type: AWS::EC2::Instance
   Properties: 
-    ImageId: ami-0866a04d72a1f5479 # ImageID valid only in us-west-1
+    ImageId: ami-015e832ac6a60f0de # ImageID valid only in us-west-1
     InstanceType: t2.micro
     AvailabilityZone: us-west-1a 
     Tags:
