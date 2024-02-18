@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploying a stack to setup Apache on linux ec2 and allocating an ElasticIP
+
+Parameters:
+#   VPCStackName:
+#     Type: string
+#     Description: use the VPC StackName if it already exists
+
+  # Region:
+  # Type: string
+  #  Description: The region where the template will be deployed
+  #   Default: us-west-2
+
+  InstanceType:
+    Description: The EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.nano
+      - t2.small
+      - t3.micro
+      - t2.large
+      - t3.large
+
+Mappings: 
+  RegionMap: 
+    us-west-1: 
+      name: ami-02d3fd86e6a2f5122
+    us-west-2:
+      name: ami-01e82af4e524a0aa3
+    eu-west-1:
+      name: ami-02d3fd86e6a2f5122
+    eu-west-2:
+      name: ami-027d95b1c717e8c5d
+    us-east-1:
+      name: ami-0e731c8a588258d0d
+    us-east-2:
+      name: ami-0c20d88b0021158c6
+    eu-central-1:
+      name: ami-03cceb19496c25679
+    ap-northeast-2:
+      name: ami-07eff2bc4837a9e01
+    ap-northeast-1:
+      name: ami-0b5c74e235ed808b9
+    ap-southeast-1:
+      name: ami-0702b1aec03c6a3a4
+
+Resources:
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", name] 
+     # SecurityGroups: 
+      #  - !ImportValue SampleNetworkCrossStack-SecurityGroupID
+      SubnetId: !ImportValue SampleNetworkCrossStack-SubnetID      
+      Tags: 
+        - Key: Name
+          Value: "webserverinstance"
+      UserData: 
+        Fn::Base64: 
+          !Sub |
+            #!/bin/bash
+            yum update -y
+            yum install httpd -y
+            echo "I enjoy learning CloudFormation, and DevOps at Cloudacademy" > /var/www/html/index.html
+            systemctl start httpd
+            systemctl enable httpd
+
+  myEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref MyEC2Instance
+
+  myENI:
+   Type: AWS::EC2::NetworkInterface
+   Properties:
+     SubnetId: !ImportValue SampleNetworkCrossStack-SubnetID      
+
+  myEIPAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      AllocationId: !GetAtt myEIP.AllocationId
+      InstanceId: !Ref MyEC2Instance
+      NetworkInterfaceId: !Ref myENI
+
+Outputs:
+  EC2InstanceDNSName:
+    Description: The instance to setup apache webserver
+    Value: !GetAtt MyEC2Instance.PublicDnsName
+    Export: 
+      Name: !Sub "${AWS::StackName}-DNSName"
+    
+  IEc2InstancePrivateIp:
+    Description: Use it as the private ip
+    Value: !GetAtt MyEC2Instance.PrivateIp
+    Export: 
+      Name: !Sub "${AWS::StackName}-PrivateIP"
