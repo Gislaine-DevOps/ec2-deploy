@@ -52,9 +52,9 @@ Resources:
     Properties:
       InstanceType: !Ref InstanceType
       ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", name] 
-     # SecurityGroups: 
-      #  - !ImportValue SampleNetworkCrossStack-SecurityGroupID
-      SubnetId: !ImportValue SampleNetworkCrossStack-SubnetID      
+      SecurityGroupIds: 
+        - !ImportValue SampleNetworkCrossStack-SecurityGroupID
+      SubnetId: !ImportValue "SampleNetworkCrossStack-SubnetID"      
       Tags: 
         - Key: Name
           Value: "webserverinstance"
@@ -76,7 +76,7 @@ Resources:
   myENI:
    Type: AWS::EC2::NetworkInterface
    Properties:
-     SubnetId: !ImportValue SampleNetworkCrossStack-SubnetID      
+     SubnetId: !ImportValue "SampleNetworkCrossStack-SubnetID"      
 
   myEIPAssociation:
     Type: AWS::EC2::EIPAssociation
