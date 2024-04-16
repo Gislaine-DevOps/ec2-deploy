@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: launching an aws ec2 cloudformation template in us-west-2
+
+Parameters: 
+  Environment:
+    Description: select the appropriate environment
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+
+  # ImageId:
+  #   Type: String  #Required
+  #   Default: ami-01e82af4e524a0aa3
+
+  InstanceType:
+    Description: Webserver ec2 instance type (has default, Allowed values)
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small  
+      - t2.medium
+      - t3.micro
+      - t2.large
+      - t2.nano
+
+Mappings: 
+  InstanceTypeEnvMap:
+    dev:
+      InstanceType: t2.micro
+    prod:
+      InstanceType: t2.large
+
+  RegionMap: 
+    us-west-1: 
+      name: ami-02d3fd86e6a2f5122
+    us-west-2:  # dynamically mapped to this region
+      name: ami-01e82af4e524a0aa3
+    eu-west-1:
+      name: ami-02d3fd86e6a2f5122
+    eu-west-2:
+      name: ami-027d95b1c717e8c5d
+    us-east-1:
+      name: ami-0e731c8a588258d0d
+    us-east-2:
+      name: ami-0c20d88b0021158c6
+    eu-central-1:
+      name: ami-03cceb19496c25679
+    ap-northeast-2:
+      name: ami-07eff2bc4837a9e01
+    ap-northeast-1:
+      name: ami-0b5c74e235ed808b9
+    ap-southeast-1:
+      name: ami-0702b1aec03c6a3a4
+    
+Resources:
+ Ec2Instance: 
+  Type: AWS::EC2::Instance
+  Properties: 
+    InstanceType: !FindInMap [ InstanceTypeEnvMap, !Ref Environment, "InstanceType" ]
+    # AvailabilityZone: us-west-2
+    ImageId: !FindInMap [ RegionMap, "us-west-2", "name" ]
+    Tags:
+      - Key: Name
+        Value: Gislaine 
+      
+# Outputs:
+#   InstanceID:
+#     Description: The Instance ID 
+#     Value: !Ref EC2Instance

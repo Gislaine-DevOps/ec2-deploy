@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: # launching an aws ec2 cloudformation template in us-west-1
+Resources:
+ Ec2Instance: 
+  Type: AWS::EC2::Instance
+  Properties: 
+    ImageId: ami-015e832ac6a60f0de # ImageID valid only in us-west-1
+    InstanceType: t2.micro
+    AvailabilityZone: us-west-1a 
+    Tags:
+      - key: Name
+        Value: "Gislaine"
+      
+Outputs:
+  InstanceID:
+    Description: The Instance ID
+    Value: !Ref EC2Instance
+    
